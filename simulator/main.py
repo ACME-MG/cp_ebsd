@@ -10,9 +10,9 @@ import time, subprocess, os, csv
 FOLDER_NAME         = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
 
 # Create paths
-PATH_HOME       = os.getcwd()
-PATH_RESULTS    = PATH_HOME + '/results' 
-PATH_SIM        = PATH_RESULTS + '/' + FOLDER_NAME
+PATH_HOME    = os.getcwd()
+PATH_RESULTS = PATH_HOME + '/results' 
+PATH_SIM     = PATH_RESULTS + '/' + FOLDER_NAME
 
 # Create a simulation folder
 os.mkdir(PATH_RESULTS + '/' + FOLDER_NAME)
@@ -25,10 +25,10 @@ os.chdir(PATH_SIM)
 # ----------------------------------------------------------
 # MOOSE/DEER SIMULATIONS
 # ----------------------------------------------------------
-PATH_DEER           = "~/moose/deer/deer-opt"
-NUM_PROCESSORS      = 32
-TASKS_PER_NODE      = 8
-VERBOSE_DISPLAY     = True
+PATH_DEER       = "~/moose/deer/deer-opt"
+NUM_PROCESSORS  = 32
+TASKS_PER_NODE  = 8
+VERBOSE_DISPLAY = True
 
 # ----------------------------------------------------------
 # MATERIAL FILE INPUTS:
@@ -40,8 +40,8 @@ POISSONS = 0.30               # IsotropicLinearElasticModel
 VSH_tau_sat = 12              # VoceSlipHardening
 VSH_b       = 66.6666666667   # VoceSlipHardening
 VSH_tau_0   = 40              # VoceSlipHardening
-AI_gamma0 = 9.55470706737e-08 # PowerLawSlipRule
-AI_n      = 12                # PowerLawSlipRule
+AI_gamma0   = 9.55470706737e-08 # PowerLawSlipRule
+AI_n        = 12                # PowerLawSlipRule
 # Lattice & Slip Systems
 LATTICE_a = 1.0
 SLIP_DIRECTION  = "1 1 0"
