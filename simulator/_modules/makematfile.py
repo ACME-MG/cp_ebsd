@@ -56,5 +56,5 @@ VSH_tau_sat, VSH_b, VSH_tau_0, AI_gamma0, AI_n):
   )
   
   # Write the XML string to file
-  with open('inmatfile.xml', "w+") as file:
+  with open('input_matfile.xml', "w+") as file:
       file.write(xml_string)

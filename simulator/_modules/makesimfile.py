@@ -153,37 +153,37 @@ SIMULATION_FORMAT = """
 # ==================================================
 [BCs]
   [./x0]
-    type = DirichletBC
+    type = {bc_x0}
     variable = disp_x
     boundary = x0
     value = 0.0
   [../]
   [./y0]
-    type = DirichletBC
+    type = {bc_y0}
     variable = disp_y
     boundary = y0
     value = 0.0
   [../]
   [./z0]
-    type = DirichletBC
+    type = {bc_z0}
     variable = disp_z
     boundary = z0
     value = 0.0
   [../]
   [./x1]
-    type = FunctionNeumannBC
+    type = {bc_x1}
     boundary = x1
     function = applied_load_x
     variable = disp_x
   [../]
   [./y1]
-    type = FunctionNeumannBC
+    type = {bc_y1}
     boundary = y1
     function = applied_load_y
     variable = disp_y
   [../]
   [./z1]
-    type = FunctionNeumannBC
+    type = {bc_z1}
     boundary = z1
     function = applied_load_z
     variable = disp_z
@@ -383,28 +383,35 @@ SIMULATION_FORMAT = """
 
 # Returns the formatted string
 def simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL_NAME,  
-START_TIME, END_TIME, STRESS_X, STRESS_Y, STRESS_Z, dt_START, dt_MIN, dt_MAX):
+                 BC_X0, BC_Y0, BC_Z0, BC_X1, BC_Y1, BC_Z1, LOAD_X, LOAD_Y, LOAD_Z, 
+                 START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX):
 
     # Define input string
     input_string = SIMULATION_FORMAT.format(
 
         # Input prameters
-        mesh_file         = MESH_FILE,
-        grains_file       = GRAINS_FILE,
-        num_grains        = NUM_GRAINS,
-        material_file     = MATERIAL_FILE,
-        material_name     = MATERIAL_NAME,
-        stress_x          = STRESS_X,
-        stress_y          = STRESS_Y,
-        stress_z          = STRESS_Z,
-        start_time        = START_TIME,
-        end_time          = END_TIME,
-        dt_start          = dt_START,
-        dt_min            = dt_MIN,
-        dt_max            = dt_MAX
+        mesh_file     = MESH_FILE,
+        grains_file   = GRAINS_FILE,
+        num_grains    = NUM_GRAINS,
+        material_file = MATERIAL_FILE,
+        material_name = MATERIAL_NAME,
+        stress_x      = LOAD_X,
+        stress_y      = LOAD_Y,
+        stress_z      = LOAD_Z,
+        bc_x0         = BC_X0,
+        bc_y0         = BC_Y0,
+        bc_z0         = BC_Z0,
+        bc_x1         = BC_X1,
+        bc_y1         = BC_Y1,
+        bc_z1         = BC_Z1,
+        start_time    = START_TIME,
+        end_time      = END_TIME,
+        dt_start      = dt_START,
+        dt_min        = dt_MIN,
+        dt_max        = dt_MAX
     )
 
     # Write the XML string to file
-    with open('insimfile.i', "w+") as file:
+    with open('input_simfile.i', "w+") as file:
         file.write(input_string)
 # %%
