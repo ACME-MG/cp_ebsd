@@ -68,20 +68,6 @@ SIMULATION_FORMAT = """
 # Define Variables
 # ==================================================
 [AuxVariables]
-  # Material
-  [./a]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-  [./b]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-  [./D]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-  # For crystal orientations (quaternion)
   [./orientation_q1]
     order = CONSTANT
     family = MONOMIAL
@@ -132,20 +118,10 @@ SIMULATION_FORMAT = """
 # Apply stress
 # ==================================================
 [Functions]
-  [./applied_load_x]
+  [./applied_load]
     type = PiecewiseLinear
     x = '0 {end_time}'
-    y = '0 {stress_x}'
-  [../]
-  [./applied_load_y]
-    type = PiecewiseLinear
-    x = '0 {end_time}'
-    y = '0 {stress_y}'
-  [../]
-  [./applied_load_z]
-    type = PiecewiseLinear
-    x = '0 {end_time}'
-    y = '0 {stress_z}'
+    y = '0 {applied_load}'
   [../]
 []
 # ==================================================
@@ -153,46 +129,33 @@ SIMULATION_FORMAT = """
 # ==================================================
 [BCs]
   [./x0]
-    type = {bc_x0}
+    type = DirichletBC
+    boundary = 'pinXY'
     variable = disp_x
-    boundary = x0
     value = 0.0
   [../]
   [./y0]
-    type = {bc_y0}
+    type = DirichletBC
+    boundary = 'pinXY'
     variable = disp_y
-    boundary = y0
     value = 0.0
   [../]
   [./z0]
-    type = {bc_z0}
+    type = DirichletBC
+    boundary = 'z0'
     variable = disp_z
-    boundary = z0
     value = 0.0
   [../]
-  [./x1]
-    type = {bc_x1}
-    boundary = x1
-    function = applied_load_x
-    variable = disp_x
-  [../]
-  [./y1]
-    type = {bc_y1}
-    boundary = y1
-    function = applied_load_y
-    variable = disp_y
-  [../]
   [./z1]
-    type = {bc_z1}
-    boundary = z1
-    function = applied_load_z
+    type = FunctionDirichletBC
+    boundary = 'z1'
     variable = disp_z
+    function = applied_load
   [../]
 []
 # ==================================================
 # Define Material
 # ==================================================
-
 [Materials]
   [./stress]
     type = NEMLCrystalPlasticity
@@ -215,7 +178,7 @@ SIMULATION_FORMAT = """
 # Define Postprocessing (History)
 # ==================================================
 [VectorPostprocessors]
-  [./ELMTS]
+  [./VPEVS]
     type = ElementValueSampler
     variable = 'orientation_q1 orientation_q2 orientation_q3 orientation_q4
                 cauchy_stress_xx cauchy_stress_yy cauchy_stress_zz
@@ -223,9 +186,9 @@ SIMULATION_FORMAT = """
                 elastic_strain_xx elastic_strain_yy elastic_strain_zz
                 mechanical_strain_xx mechanical_strain_yy mechanical_strain_zz'
     contains_complete_history = false
-    #execute_on = 'initial timestep_end' #NONE
+    execute_on = 'initial timestep_end'
     sort_by = id
-    #outputs = ELSpler
+    #outputs = VPEVS
   [../]
 []
 # ==================================================
@@ -281,7 +244,7 @@ SIMULATION_FORMAT = """
     type = ElementAverageValue
     variable = strain_zz
   [../]
-  # Mean: MECHANICAL STRAIN -------------------------------------------------------
+  # Mean: MECHANICAL STRAIN -----------------------------------------------------
   [./mME_xx]
     type = ElementAverageValue
     variable = mechanical_strain_xx
@@ -362,7 +325,10 @@ SIMULATION_FORMAT = """
     type = Exodus
     file_base = 'output'
     elemental_as_nodal = true
-    #sync_times = '0 0.1 1 10'
+	  interval = 1
+	  execute_on = 'initial timestep_end'
+	  #sync_only = true
+    #sync_times = '0 0.5 1'
   [../]
   [./console]
     type = Console
@@ -374,17 +340,19 @@ SIMULATION_FORMAT = """
   [./outfile]
     type = CSV
     file_base = 'output'
+	  time_data = true
     delimiter = ','
-    time_data = true
-    execute_vector_postprocessors_on = timestep_end
+	  interval = 1
+    execute_on = 'initial timestep_end'
+	  #sync_only = true
+    #sync_times = '0 0.5 1'
   [../]
 []
 """
 
 # Returns the formatted string
 def simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL_NAME,  
-                 BC_X0, BC_Y0, BC_Z0, BC_X1, BC_Y1, BC_Z1, LOAD_X, LOAD_Y, LOAD_Z, 
-                 START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX):
+                 APPLIED_LOAD, START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX):
 
     # Define input string
     input_string = SIMULATION_FORMAT.format(
@@ -395,15 +363,7 @@ def simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL
         num_grains    = NUM_GRAINS,
         material_file = MATERIAL_FILE,
         material_name = MATERIAL_NAME,
-        stress_x      = LOAD_X,
-        stress_y      = LOAD_Y,
-        stress_z      = LOAD_Z,
-        bc_x0         = BC_X0,
-        bc_y0         = BC_Y0,
-        bc_z0         = BC_Z0,
-        bc_x1         = BC_X1,
-        bc_y1         = BC_Y1,
-        bc_z1         = BC_Z1,
+        applied_load  = APPLIED_LOAD,
         start_time    = START_TIME,
         end_time      = END_TIME,
         dt_start      = dt_START,

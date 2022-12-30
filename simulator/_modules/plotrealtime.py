@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-PATH_OUTPUT = '/data2/omz/abq10jobs/cp_ebsd/simulator/output/A617KAERI_grains190/221226150335'
+PATH_OUTPUT = '/data2/omz/abq10jobs/cp_ebsd/simulator/output/A617KAERI_grains190/221226150335_2'
 os.chdir(PATH_OUTPUT)
 
 output = pd.read_csv(r'output.csv')
