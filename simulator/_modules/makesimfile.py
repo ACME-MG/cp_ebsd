@@ -121,7 +121,7 @@ SIMULATION_FORMAT = """
   [./applied_load]
     type = PiecewiseLinear
     x = '0 {end_time}'
-    y = '0 {applied_load}'
+    y = '0 {applied_displacement}'
   [../]
 []
 # ==================================================
@@ -342,33 +342,33 @@ SIMULATION_FORMAT = """
     file_base = 'output'
 	  time_data = true
     delimiter = ','
-	  interval = 1
+	  #interval = 1
     execute_on = 'initial timestep_end'
-	  #sync_only = true
-    #sync_times = '0 0.5 1'
+	  sync_only = true
+    sync_times = '0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0'
   [../]
 []
 """
 
 # Returns the formatted string
 def simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL_NAME,  
-                 APPLIED_LOAD, START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX):
+                     APPLIED_DISPLACEMENT, START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX):
 
     # Define input string
     input_string = SIMULATION_FORMAT.format(
 
         # Input prameters
-        mesh_file     = MESH_FILE,
-        grains_file   = GRAINS_FILE,
-        num_grains    = NUM_GRAINS,
-        material_file = MATERIAL_FILE,
-        material_name = MATERIAL_NAME,
-        applied_load  = APPLIED_LOAD,
-        start_time    = START_TIME,
-        end_time      = END_TIME,
-        dt_start      = dt_START,
-        dt_min        = dt_MIN,
-        dt_max        = dt_MAX
+        mesh_file             = MESH_FILE,
+        grains_file           = GRAINS_FILE,
+        num_grains            = NUM_GRAINS,
+        material_file         = MATERIAL_FILE,
+        material_name         = MATERIAL_NAME,
+        applied_displacement  = APPLIED_DISPLACEMENT,
+        start_time            = START_TIME,
+        end_time              = END_TIME,
+        dt_start              = dt_START,
+        dt_min                = dt_MIN,
+        dt_max                = dt_MAX
     )
 
     # Write the XML string to file

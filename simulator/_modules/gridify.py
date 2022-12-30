@@ -6,7 +6,8 @@ from scipy import interpolate
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
-def gridify_output(PATH_OUTPUT, PIXEL_SIZE):
+
+def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL):
 
     os.chdir(PATH_OUTPUT)
 
@@ -68,7 +69,25 @@ def gridify_output(PATH_OUTPUT, PIXEL_SIZE):
             zOld = df[column]
             zGrid = interpolate.griddata((xOld, yOld), zOld, (xGrid, yGrid), method='nearest')
             dfNew[column] = zGrid.flatten()
-
+            # Plot gridified data
+            # -------------------------------
+            # Create plot name
+            plt_name = column + '_' + df_count
+            # Calculate (width_of_image/height_of_image)
+            ratio = zGrid.shape[1]/zGrid.shape[0]
+            fig, (ax) = plt.subplots(1, figsize=(8, 8))
+            plt.contourf(xGrid, yGrid, zGrid, 10, cmap='bwr', 
+                vmin=round(np.amin(zGrid)), vmax=round(np.amax(zGrid)))
+            plt.xlim([0, MAX_HORIZONTAL])
+            plt.ylim([0, MAX_VERTICAL])
+            plt.xticks([])
+            plt.yticks([])
+            plt.axis('image')
+            plt.colorbar(orientation="horizontal", fraction=0.047*ratio)
+            plt.tight_layout()
+            plt.savefig(plt_name)
+            plt.close(fig)
+        # Save gridified data in columns    
         dfNew.to_csv(df_name, index=False)
 
     print('------------------------------------')

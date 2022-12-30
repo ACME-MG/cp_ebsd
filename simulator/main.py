@@ -6,9 +6,10 @@ MAIN
 from _modules.makematfile import matfile_cp_voce
 from _modules.makesimfile import simfile_uniaxial
 from _modules.plotsscurve import plot_sscurve
+from _modules.gridify import gridify_output
 import time, subprocess, os, csv
 
-FOLDER_INPUT = 'A617KAERI_grains190'
+FOLDER_INPUT = 'TESTMESH_grains12'
 FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
 
 # Create paths
@@ -49,31 +50,46 @@ matfile_cp_voce(YOUNGS, POISSONS, SLIP_DIRECTION, SLIP_PLANE, MATERIAL_NAME,
 # ----------------------------------------------------------
 # SIMULATIONS FILE INPUTS:
 # ----------------------------------------------------------
-NUM_GRAINS     = 190
-MESH_FILE      = "input_meshfile.e"
-GRAINS_FILE    = "input_grainsfile.csv"
-MATERIAL_FILE  = "input_matfile.xml"
-# Boudnary conditions 
-BC_X0 = 'DirichletBC'; BC_Y0 = 'DirichletBC'; BC_Z0 = 'DirichletBC'
-BC_X1 = 'FunctionNeumannBC' # or/ FunctionDirichletBC
-BC_Y1 = 'FunctionNeumannBC' # or/ FunctionDirichletBC
-BC_Z1 = 'FunctionDirichletBC' # or/ FunctionDirichletBC
-# Loading
-LOAD_X = 0
-LOAD_Y = 0 
-LOAD_Z = 1
+"""
+!> pinXY has to exist in the mesh file 
+!> z0 plane is created by mooose 
+[BCs]
+  [./x0] type = DirichletBC, boundary = 'pinXY', variable = disp_x, value = 0.0
+  [./y0] type = DirichletBC, boundary = 'pinXY', variable = disp_y, value = 0.0
+  [./z0] type = DirichletBC, boundary = 'z0',    variable = disp_z, value = 0.0
+  [./z1] type = FunctionDirichletBC, boundary = 'z1', variable = disp_z, function = applied_displacement
+[]
+[Functions]
+  [./applied_displacement]
+    type = PiecewiseLinear
+    x = '0 1'
+    y = '0 0.19'
+  [../]
+[]
+"""
+# Model 
+MAX_HORIZONTAL = 19  # model size
+MAX_VERTICAL   = 16  # model size
+NUM_GRAINS     = 12  # number of grains
+PIXEL_SIZE     = 0.1 # for gridifying the outputs
+# Input files
+MESH_FILE     = "input_meshfile.e"
+GRAINS_FILE   = "input_grainsfile.csv"
+MATERIAL_FILE = "input_matfile.xml"
+# Applied Strain
+REQUESTED_STRAIN = 0.005
+APPLIED_DISPLACEMENT = MAX_HORIZONTAL * REQUESTED_STRAIN
 # Time
 START_TIME = 0
 END_TIME   = 1
 # Solver 
-dt_START   = 0.01
+dt_START   = 0.1
 dt_MIN     = 1e-10
 dt_MAX     = 0.1
 # ----------------------------------------------------------
 # Create MOOSE/DEER simulation file
 simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL_NAME,  
-                 BC_X0, BC_Y0, BC_Z0, BC_X1, BC_Y1, BC_Z1, LOAD_X, LOAD_Y, LOAD_Z, 
-                 START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX)
+                 APPLIED_DISPLACEMENT, START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX)
 
 #%%
 # ----------------------------------------------------------
@@ -102,6 +118,10 @@ subprocess.run([command],  shell = True, check = True)
 plot_sscurve(PATH_OUTPUT, VSH_tau_sat, VSH_b, VSH_tau_0, AI_gamma0, AI_n)
 
 #%%
-print('----------------------------------')
-print('LA FIN')
-print('----------------------------------')
+
+gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL)
+
+#%%
+print('------------------------------------')
+print('LA FIN (MAIN)')
+print('------------------------------------')
