@@ -37,10 +37,6 @@ def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL):
     print(df_names)
     print('------------------------------------')
 
-    print('------------------------------------')
-    print('Start Gridifying Output')
-    print('------------------------------------')
-
     for df in df_list:
 
         # Extract numbers from the dataframe name
@@ -76,20 +72,16 @@ def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL):
             # Calculate (width_of_image/height_of_image)
             ratio = zGrid.shape[1]/zGrid.shape[0]
             fig, (ax) = plt.subplots(1, figsize=(8, 8))
-            plt.contourf(xGrid, yGrid, zGrid, 10, cmap='bwr', 
-                vmin=round(np.amin(zGrid)), vmax=round(np.amax(zGrid)))
+            plt.contourf(xGrid, yGrid, zGrid, 20, cmap='bwr', 
+                vmin=round(np.amin(zGrid),4), vmax=round(np.amax(zGrid),4))
             plt.xlim([0, MAX_HORIZONTAL])
             plt.ylim([0, MAX_VERTICAL])
             plt.xticks([])
             plt.yticks([])
             plt.axis('image')
-            plt.colorbar(orientation="horizontal", fraction=0.047*ratio)
+            plt.colorbar(orientation="horizontal", fraction=0.040*ratio)
             plt.tight_layout()
             plt.savefig(plt_name)
             plt.close(fig)
         # Save gridified data in columns    
         dfNew.to_csv(df_name, index=False)
-
-    print('------------------------------------')
-    print('Finish Gridifying Output')
-    print('------------------------------------')

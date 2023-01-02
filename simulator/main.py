@@ -8,9 +8,16 @@ from _modules.makesimfile import simfile_uniaxial
 from _modules.plotsscurve import plot_sscurve
 from _modules.gridify import gridify_output
 import time, subprocess, os, csv
+import pandas as pd
 
-FOLDER_INPUT = 'TESTMESH_grains12'
+# Input/Output folders
+FOLDER_INPUT = 'A617KAERI/i3_middle'
 FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
+
+# Input files
+MESH_FILE = "input_meshfile.e"
+GRAINS_FILE = "input_grainsfile.csv"
+MATERIAL_FILE = "input_matfile.xml"
 
 # Create paths
 PATH_HOME    = os.getcwd()
@@ -23,6 +30,10 @@ os.system('mkdir -p ' + PATH_OUTPUT)
 os.system('cp ' + PATH_INPUT + '/* ' + PATH_OUTPUT)
 # Go the output folder
 os.chdir(PATH_OUTPUT)
+
+# Check the number of grains in "input_grainsfile.csv"
+GRAINSFILE = pd.read_csv(r'input_grainsfile.csv', header=None)
+NUM_GRAINS = len(GRAINSFILE)  # number of grains
 
 #%%
 # ----------------------------------------------------------
@@ -68,16 +79,11 @@ matfile_cp_voce(YOUNGS, POISSONS, SLIP_DIRECTION, SLIP_PLANE, MATERIAL_NAME,
 []
 """
 # Model 
-MAX_HORIZONTAL = 19  # model size
-MAX_VERTICAL   = 16  # model size
-NUM_GRAINS     = 12  # number of grains
+MAX_HORIZONTAL = 113  # model size
+MAX_VERTICAL   = 88  # model size
 PIXEL_SIZE     = 0.1 # for gridifying the outputs
-# Input files
-MESH_FILE     = "input_meshfile.e"
-GRAINS_FILE   = "input_grainsfile.csv"
-MATERIAL_FILE = "input_matfile.xml"
 # Applied Strain
-REQUESTED_STRAIN = 0.005
+REQUESTED_STRAIN = 0.01
 APPLIED_DISPLACEMENT = MAX_HORIZONTAL * REQUESTED_STRAIN
 # Time
 START_TIME = 0
@@ -107,21 +113,45 @@ command = "mpiexec -np {num_processors} {path_deer} -i {input_path}".format(
     input_path      = 'input_simfile.i',
 )
 
-#%%
-#subprocess.call([command], shell = True)
-subprocess.run([command],  shell = True, check = True)
+# %% -----------------------------------------
+print('------------------------------------')
+print('Start Running Simulation')
+print('------------------------------------')
 
-#%%
-# ----------------------------------------------------------
-# PLOT RESULTS
-# ----------------------------------------------------------
+try: 
+  #subprocess.call([command], shell = True)
+  subprocess.run([command],  shell = True, check = True)
+except:
+  print('Simulation Error - Probably Convergence Problem')
+
+print('------------------------------------')
+print('Finish Running Simulation')
+print('------------------------------------')
+
+# %% -----------------------------------------
+print('------------------------------------')
+print('Start Plotting Stress-Strain Curves')
+print('------------------------------------')
+
 plot_sscurve(PATH_OUTPUT, VSH_tau_sat, VSH_b, VSH_tau_0, AI_gamma0, AI_n)
 
-#%%
+print('------------------------------------')
+print('Finish Plotting Stress-Strain Curves')
+print('------------------------------------')
+
+# %% -----------------------------------------
+
+print('------------------------------------')
+print('Start Gridifying Output')
+print('------------------------------------')
 
 gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL)
 
-#%%
+print('------------------------------------')
+print('Finish Gridifying Output')
+print('------------------------------------')
+
+#%% -----------------------------------------
 print('------------------------------------')
 print('LA FIN (MAIN)')
 print('------------------------------------')

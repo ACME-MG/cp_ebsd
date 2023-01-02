@@ -325,9 +325,9 @@ SIMULATION_FORMAT = """
     type = Exodus
     file_base = 'output'
     elemental_as_nodal = true
-	  interval = 1
-	  execute_on = 'initial timestep_end'
-	  #sync_only = true
+    interval = 1
+    execute_on = 'initial timestep_end'
+    #sync_only = true
     #sync_times = '0 0.5 1'
   [../]
   [./console]
@@ -340,11 +340,11 @@ SIMULATION_FORMAT = """
   [./outfile]
     type = CSV
     file_base = 'output'
-	  time_data = true
+    time_data = true
     delimiter = ','
-	  #interval = 1
+    #interval = 1
     execute_on = 'initial timestep_end'
-	  sync_only = true
+    sync_only = true
     sync_times = '0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0'
   [../]
 []
