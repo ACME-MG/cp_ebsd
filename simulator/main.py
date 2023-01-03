@@ -1,7 +1,8 @@
 """
 MAIN
 """
-#%%
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 
 from _modules.makematfile import matfile_cp_voce
 from _modules.makesimfile import simfile_uniaxial
@@ -9,14 +10,15 @@ from _modules.plotsscurve import plot_sscurve
 from _modules.gridify import gridify_output
 import time, subprocess, os, csv
 import pandas as pd
+import envbash
 
 # Input/Output folders
-FOLDER_INPUT = 'A617KAERI/i3_middle'
+FOLDER_INPUT  = 'A617KAERI/i3_middle'
 FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
 
 # Input files
-MESH_FILE = "input_meshfile.e"
-GRAINS_FILE = "input_grainsfile.csv"
+MESH_FILE     = "input_meshfile.e"
+GRAINS_FILE   = "input_grainsfile.csv"
 MATERIAL_FILE = "input_matfile.xml"
 
 # Create paths
@@ -35,10 +37,29 @@ os.chdir(PATH_OUTPUT)
 GRAINSFILE = pd.read_csv(r'input_grainsfile.csv', header=None)
 NUM_GRAINS = len(GRAINSFILE)  # number of grains
 
-#%%
-# ----------------------------------------------------------
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+# USER INPUTS
+# -----------------------------------------------------------------------------------
+# Model
+MAX_HORIZONTAL = 113  # model size
+MAX_VERTICAL   = 88  # model size
+PIXEL_SIZE     = 0.1  # for gridifying the outputs
+# Applied Strain
+REQUESTED_STRAIN     = 0.01
+APPLIED_DISPLACEMENT = MAX_HORIZONTAL * REQUESTED_STRAIN
+# Time
+START_TIME = 0
+END_TIME   = 1
+# Solver
+dt_START = 0.1
+dt_MIN   = 1e-10
+dt_MAX   = 0.1
+
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # MATERIAL FILE INPUTS:
-# ----------------------------------------------------------
+# -----------------------------------------------------------------------------------
 MATERIAL_NAME = 'CP1'
 YOUNGS   = 211000        # IsotropicLinearElasticModel
 POISSONS = 0.30          # IsotropicLinearElasticModel
@@ -52,15 +73,15 @@ AI_n        = 12         # PowerLawSlipRule
 LATTICE_a = 1.0
 SLIP_DIRECTION  = "1 1 0"
 SLIP_PLANE      = "1 1 1"
-# ----------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # Creat xml material file
 matfile_cp_voce(YOUNGS, POISSONS, SLIP_DIRECTION, SLIP_PLANE, MATERIAL_NAME, 
     VSH_tau_sat, VSH_b, VSH_tau_0, AI_gamma0, AI_n)
 
-#%%
-# ----------------------------------------------------------
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # SIMULATIONS FILE INPUTS:
-# ----------------------------------------------------------
+# -----------------------------------------------------------------------------------
 """
 !> pinXY has to exist in the mesh file 
 !> z0 plane is created by mooose 
@@ -78,80 +99,71 @@ matfile_cp_voce(YOUNGS, POISSONS, SLIP_DIRECTION, SLIP_PLANE, MATERIAL_NAME,
   [../]
 []
 """
-# Model 
-MAX_HORIZONTAL = 113  # model size
-MAX_VERTICAL   = 88  # model size
-PIXEL_SIZE     = 0.1 # for gridifying the outputs
-# Applied Strain
-REQUESTED_STRAIN = 0.01
-APPLIED_DISPLACEMENT = MAX_HORIZONTAL * REQUESTED_STRAIN
-# Time
-START_TIME = 0
-END_TIME   = 1
-# Solver 
-dt_START   = 0.1
-dt_MIN     = 1e-10
-dt_MAX     = 0.1
-# ----------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # Create MOOSE/DEER simulation file
 simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL_NAME,  
                  APPLIED_DISPLACEMENT, START_TIME, END_TIME, dt_START, dt_MIN, dt_MAX)
 
-#%%
-# ----------------------------------------------------------
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # RUN SIMULATIONS
-# ----------------------------------------------------------
-PATH_DEER       = "~/moose/deer/deer-opt"
+# -----------------------------------------------------------------------------------
+PATH_DEER       = "/home/omz/moose/deer/deer-opt"
 NUM_PROCESSORS  = 32
 TASKS_PER_NODE  = 8
 VERBOSE_DISPLAY = True
 # Run simulation
-command = "mpiexec -np {num_processors} {path_deer} -i {input_path}".format(
+COMMAND = "mpiexec -np {num_processors} {path_deer} -i {input_path}".format(
     path_deer       = PATH_DEER,
     num_processors  = NUM_PROCESSORS,
     tasks_per_node  = TASKS_PER_NODE,
     input_path      = 'input_simfile.i',
 )
 
-# %% -----------------------------------------
 print('------------------------------------')
-print('Start Running Simulation')
-print('------------------------------------')
-
-try: 
-  #subprocess.call([command], shell = True)
-  subprocess.run([command],  shell = True, check = True)
-except:
-  print('Simulation Error - Probably Convergence Problem')
-
-print('------------------------------------')
-print('Finish Running Simulation')
+print('./> Running Simulation')
 print('------------------------------------')
 
-# %% -----------------------------------------
+print(PATH_OUTPUT)
+print(COMMAND)
+subprocess.run('ls', cwd=PATH_OUTPUT)
+envbash.load_envbash('/home/omz/.bash_profile')  # source ~/.bash_profile
+subprocess.run([COMMAND],  shell=True, check=True, cwd=PATH_OUTPUT)
 print('------------------------------------')
-print('Start Plotting Stress-Strain Curves')
+print('./> Simulation Error')
+print('------------------------------------')
+
+print('------------------------------------')
+print('./> Done')
+print('------------------------------------')
+
+# %% ---------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
+print('------------------------------------')
+print('./> Plotting Stress-Strain Curves')
 print('------------------------------------')
 
 plot_sscurve(PATH_OUTPUT, VSH_tau_sat, VSH_b, VSH_tau_0, AI_gamma0, AI_n)
 
 print('------------------------------------')
-print('Finish Plotting Stress-Strain Curves')
+print('./> Done')
 print('------------------------------------')
 
-# %% -----------------------------------------
-
+# %% ---------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 print('------------------------------------')
-print('Start Gridifying Output')
+print('./> Gridifying Output')
 print('------------------------------------')
 
 gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL)
 
 print('------------------------------------')
-print('Finish Gridifying Output')
+print('./> Done')
 print('------------------------------------')
 
-#%% -----------------------------------------
+# %% ---------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
+
 print('------------------------------------')
-print('LA FIN (MAIN)')
+print('./> LA FIN (MAIN)')
 print('------------------------------------')
