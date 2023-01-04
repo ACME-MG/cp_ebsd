@@ -3,29 +3,59 @@ MAIN
 """
 # %% --------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
-
 from _modules.makematfile import matfile_cp_voce
 from _modules.makesimfile import simfile_uniaxial
 from _modules.plotsscurve import plot_sscurve
 from _modules.gridify import gridify_output
-import time, subprocess, os, csv
+import time, subprocess, os, sys 
 import pandas as pd
 import envbash
 
-# Input/Output folders
-FOLDER_INPUT  = 'A617KAERI/i3_middle'
-FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
+sys.path.append('/home/omz/seacas/lib')
+import exodus
 
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+# USER INPUTS
+# -----------------------------------------------------------------------------------
+# Applied Strain
+REQUESTED_STRAIN = 0.01  # applied strain
+# Time
+START_TIME = 0
+END_TIME   = 1
+# Solver
+dt_START = 0.01
+dt_MIN   = 1e-10
+dt_MAX   = 0.1
+# Output 
+PIXEL_SIZE = 0.1   # gridifying the outputs
+# -----------------------------------------------------------------------------------
+# Input/Output folders
+FOLDER_INPUT = 'TEST/grains12'
+FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
+print('------------------------------------')
+print('FOLDER_INPUT =',  FOLDER_INPUT)
+print('FOLDER_OUTPUT =', FOLDER_OUTPUT)
+print('------------------------------------')
+
+# %% --------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+# FILE MANAGMENT
+# -----------------------------------------------------------------------------------
 # Input files
 MESH_FILE     = "input_meshfile.e"
 GRAINS_FILE   = "input_grainsfile.csv"
 MATERIAL_FILE = "input_matfile.xml"
-
+# -----------------------------------------------------------------------------------
 # Create paths
 PATH_HOME    = os.getcwd()
 PATH_INPUT   = PATH_HOME + '/input/'  + FOLDER_INPUT
 PATH_OUTPUT  = PATH_HOME + '/output/' + FOLDER_INPUT + '/' + FOLDER_OUTPUT
-
+print('------------------------------------')
+print('PATH_INPUT =',  PATH_INPUT)
+print('PATH_OUTPUT =', PATH_OUTPUT)
+print('------------------------------------')
+# -----------------------------------------------------------------------------------
 # Create an output folder
 os.system('mkdir -p ' + PATH_OUTPUT)
 # Copy input files into the simulation folder
@@ -33,28 +63,29 @@ os.system('cp ' + PATH_INPUT + '/* ' + PATH_OUTPUT)
 # Go the output folder
 os.chdir(PATH_OUTPUT)
 
-# Check the number of grains in "input_grainsfile.csv"
-GRAINSFILE = pd.read_csv(r'input_grainsfile.csv', header=None)
-NUM_GRAINS = len(GRAINSFILE)  # number of grains
-
 # %% --------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
-# USER INPUTS
+# INPUT MESH EXODUS FILE
 # -----------------------------------------------------------------------------------
-# Model
-MAX_HORIZONTAL = 113  # model size
-MAX_VERTICAL   = 88  # model size
-PIXEL_SIZE     = 0.1  # for gridifying the outputs
-# Applied Strain
-REQUESTED_STRAIN     = 0.01
-APPLIED_DISPLACEMENT = MAX_HORIZONTAL * REQUESTED_STRAIN
-# Time
-START_TIME = 0
-END_TIME   = 1
-# Solver
-dt_START = 0.1
-dt_MIN   = 1e-10
-dt_MAX   = 0.1
+# Open input_meshfile.e
+E = exodus.exodus(MESH_FILE, 'r')
+# Get coorinates
+x_coords, y_coords, z_coords = E.get_coords()
+print('------------------------------------')
+print('./> MODEL INFO/SIZE')
+print('------------------------------------')
+print('x_coords:',   min(x_coords), max(x_coords),
+      '\ny_coords:', min(y_coords), max(y_coords),
+      '\nz_coords:', min(z_coords), max(z_coords))
+print('NUM_GRAINS = ',   E.num_blks())
+print('NUM_ELEMENTS = ', E.num_elems())
+print('NUM_NODES = ',    E.num_nodes())
+print('------------------------------------')
+# Set variables
+NUM_GRAINS = E.num_blks()  # number of grains
+MAX_X = max(x_coords)
+MAX_Y = max(y_coords)
+MAX_Z = max(z_coords)
 
 # %% --------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
@@ -99,6 +130,8 @@ matfile_cp_voce(YOUNGS, POISSONS, SLIP_DIRECTION, SLIP_PLANE, MATERIAL_NAME,
   [../]
 []
 """
+# Applied Displacment
+APPLIED_DISPLACEMENT = MAX_Z * REQUESTED_STRAIN
 # -----------------------------------------------------------------------------------
 # Create MOOSE/DEER simulation file
 simfile_uniaxial(MESH_FILE, GRAINS_FILE, NUM_GRAINS, MATERIAL_FILE, MATERIAL_NAME,  
@@ -121,44 +154,49 @@ COMMAND = "mpiexec -np {num_processors} {path_deer} -i {input_path}".format(
 )
 
 print('------------------------------------')
-print('./> Running Simulation')
+print('./> RUNNING SIMULATION')
 print('------------------------------------')
 
 print(PATH_OUTPUT)
 print(COMMAND)
+print('------------------------------------')
 subprocess.run('ls', cwd=PATH_OUTPUT)
+print('------------------------------------')
 envbash.load_envbash('/home/omz/.bash_profile')  # source ~/.bash_profile
 subprocess.run([COMMAND],  shell=True, check=True, cwd=PATH_OUTPUT)
 print('------------------------------------')
-print('./> Simulation Error')
+print('./> SIMULATION ERROR')
 print('------------------------------------')
 
 print('------------------------------------')
-print('./> Done')
+print('./> DONE')
 print('------------------------------------')
 
 # %% ---------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------
 print('------------------------------------')
-print('./> Plotting Stress-Strain Curves')
+print('./> PLOTTING STRESS-STRAIN CURVES')
 print('------------------------------------')
 
+# Plot stress strain curve
 plot_sscurve(PATH_OUTPUT, VSH_tau_sat, VSH_b, VSH_tau_0, AI_gamma0, AI_n)
 
 print('------------------------------------')
-print('./> Done')
+print('./> DONE')
 print('------------------------------------')
 
 # %% ---------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------
 print('------------------------------------')
-print('./> Gridifying Output')
+print('./> GRIDIFYING OUTPUT')
 print('------------------------------------')
 
-gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL)
+# Gridify the output using defined pixel size. 
+# The through thickness (X) is not considered. 
+gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_Z, MAX_Y)
 
 print('------------------------------------')
-print('./> Done')
+print('./> DONE')
 print('------------------------------------')
 
 # %% ---------------------------------------------------------------------------------

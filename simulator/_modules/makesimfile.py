@@ -344,8 +344,8 @@ SIMULATION_FORMAT = """
     delimiter = ','
     #interval = 1
     execute_on = 'initial timestep_end'
-    sync_only = true
-    sync_times = '0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0'
+    #sync_only = true
+    #sync_times = '0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0'
   [../]
 []
 """

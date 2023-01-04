@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 
-def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL):
+def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_Z, MAX_Y):
 
     os.chdir(PATH_OUTPUT)
 
@@ -40,9 +40,9 @@ def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL):
     for df in df_list:
 
         # Extract numbers from the dataframe name
-        numbers = re.findall(r'\d+', df.name)
+        numbers  = re.findall(r'\d+', df.name)
         df_count = ''.join(numbers)
-        df_name  = 'output_gridify_' + df_count + '.csv'
+        df_name  = 'output_VPEVS_gridify_' + df_count + '.csv'
         print(df_name)
 
         xOld = df['z']
@@ -74,8 +74,8 @@ def gridify_output(PATH_OUTPUT, PIXEL_SIZE, MAX_HORIZONTAL, MAX_VERTICAL):
             fig, (ax) = plt.subplots(1, figsize=(8, 8))
             plt.contourf(xGrid, yGrid, zGrid, 20, cmap='bwr', 
                 vmin=round(np.amin(zGrid),4), vmax=round(np.amax(zGrid),4))
-            plt.xlim([0, MAX_HORIZONTAL])
-            plt.ylim([0, MAX_VERTICAL])
+            plt.xlim([0, MAX_Z])
+            plt.ylim([0, MAX_Y])
             plt.xticks([])
             plt.yticks([])
             plt.axis('image')
