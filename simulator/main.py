@@ -19,19 +19,19 @@ import exodus
 # USER INPUTS
 # -----------------------------------------------------------------------------------
 # Applied Strain
-REQUESTED_STRAIN = 0.01  # applied strain
+REQUESTED_STRAIN = 0.005  # applied strain
 # Time
 START_TIME = 0
 END_TIME   = 1
 # Solver
-dt_START = 0.01
+dt_START = 0.025
 dt_MIN   = 1e-10
-dt_MAX   = 0.1
+dt_MAX   = 0.25
 # Output 
 PIXEL_SIZE = 0.1   # gridifying the outputs
 # -----------------------------------------------------------------------------------
 # Input/Output folders
-FOLDER_INPUT = 'TEST/grains12'
+FOLDER_INPUT = 'A617KAERI/i2_middle'
 FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
 print('------------------------------------')
 print('FOLDER_INPUT =',  FOLDER_INPUT)
