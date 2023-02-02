@@ -14,12 +14,17 @@ import envbash
 sys.path.append('/home/omz/seacas/lib')
 import exodus
 
+# create numbers for the output folder
+# 1 to 1000
+
+
+
 # %% --------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
 # USER INPUTS
 # -----------------------------------------------------------------------------------
 # Applied Strain
-REQUESTED_STRAIN = 0.005  # applied strain
+REQUESTED_STRAIN = 0.05  # applied strain
 # Time
 START_TIME = 0
 END_TIME   = 1
@@ -31,7 +36,7 @@ dt_MAX   = 0.1
 PIXEL_SIZE = 0.1   # gridifying the outputs
 # -----------------------------------------------------------------------------------
 # Input/Output folders
-FOLDER_INPUT = 'A617KAERI/i2a_middle'
+FOLDER_INPUT = 'A617KAERI/i2b_middle'
 FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
 print('------------------------------------')
 print('FOLDER_INPUT =',  FOLDER_INPUT)

@@ -163,6 +163,7 @@ SIMULATION_FORMAT = """
     model = "{material_name}"
     large_kinematics = true
     euler_angle_reader = euler_angle_file
+    angle_convention = "bunge"
   [../]
 []
 # ==================================================
@@ -310,8 +311,8 @@ SIMULATION_FORMAT = """
     growth_factor = 2
     cutback_factor = 0.5
     linear_iteration_ratio = 1000
-    optimal_iterations = 12
-    iteration_window = 2
+    optimal_iterations = 8 #12
+    iteration_window = 3
     dt = {dt_start}
   [../]
 []
