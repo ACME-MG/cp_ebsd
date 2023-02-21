@@ -14,11 +14,6 @@ import envbash
 sys.path.append('/home/omz/seacas/lib')
 import exodus
 
-# create numbers for the output folder
-# 1 to 1000
-
-
-
 # %% --------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------
 # USER INPUTS
@@ -36,7 +31,7 @@ dt_MAX   = 0.1
 PIXEL_SIZE = 0.1   # gridifying the outputs
 # -----------------------------------------------------------------------------------
 # Input/Output folders
-FOLDER_INPUT = 'A617KAERI/i2b_middle'
+FOLDER_INPUT = 'A617KAERI/i2b_cropped_t2'
 FOLDER_OUTPUT = time.strftime("%y%m%d%H%M%S", time.localtime(time.time()))
 print('------------------------------------')
 print('FOLDER_INPUT =',  FOLDER_INPUT)
@@ -87,7 +82,7 @@ print('NUM_ELEMENTS = ', E.num_elems())
 print('NUM_NODES = ',    E.num_nodes())
 print('------------------------------------')
 # Set variables
-NUM_GRAINS = E.num_blks()  # number of grains
+NUM_GRAINS = E.num_blks()  # number of blocks/grains
 MAX_X = max(x_coords)
 MAX_Y = max(y_coords)
 MAX_Z = max(z_coords)

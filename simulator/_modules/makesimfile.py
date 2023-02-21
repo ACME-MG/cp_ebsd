@@ -130,19 +130,19 @@ SIMULATION_FORMAT = """
 [BCs]
   [./x0]
     type = DirichletBC
-    boundary = 'pinXY'
+    boundary = 'pinXYZ pinYZ'
     variable = disp_x
     value = 0.0
   [../]
   [./y0]
     type = DirichletBC
-    boundary = 'pinXY'
+    boundary = 'pinXYZ'
     variable = disp_y
     value = 0.0
   [../]
   [./z0]
     type = DirichletBC
-    boundary = 'z0'
+    boundary = 'z0 pinXYZ pinYZ pinZ'
     variable = disp_z
     value = 0.0
   [../]
